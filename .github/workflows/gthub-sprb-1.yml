@@ -1,12 +1,12 @@
-name: Gthub-Sprb-1
+name: Simple CRUD with JPA workflow
 
 on:
   push:
     paths:
-      - 'gthub-sprb-1/**'
+      - 'simple-crud-jpa/**'
   pull_request:
     paths:
-      - 'gthub-sprb-1/**'
+      - 'simple-crud-jpa/**'
   workflow_dispatch:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: gthub-sprb-1
+        working-directory: simple-crud-jpa
 
     steps:
       - name: Checkout
@@ -36,5 +36,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gthub-sprb-1-jar
-          path: gthub-sprb-1/target/*.jar
+          name: simple-crud-jpa-jar
+          path: simple-crud-jpa/target/*.jar
