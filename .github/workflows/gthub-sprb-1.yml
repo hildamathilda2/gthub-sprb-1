@@ -38,3 +38,68 @@ jobs:
         with:
           name: simple-crud-jpa-jar
           path: simple-crud-jpa/target/*.jar
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.5
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: SecureP@ssw0rd
+          POSTGRES_DB: new_bank_database
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:6.2.19
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.14.0
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: false
+        ports:
+          - 9200:9200
+        options: >-
+          --health-cmd "curl -f http://localhost:9200/_cluster/health || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+      kibana:
+        image: docker.elastic.co/kibana/kibana:8.14.0
+        ports:
+          - 5601:5601
+        options: >-
+          --health-cmd "curl -f http://localhost:5601/api/status || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Wait for services
+        run: |
+          for i in {1..30}; do
+            pg_isready -h localhost -p 5432 && redis-cli -h localhost ping && curl -f http://localhost:9200 && curl -f http://localhost:5601 && break
+            sleep 5
+          done
+
+      - name: Run your tests
+        run: echo "Run integration tests here"
+  
